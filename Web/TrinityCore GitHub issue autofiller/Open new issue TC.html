@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>GitHub Issue Autofiller V1 - CRAFTED EDITION</title>
+    <style>
+        body {
+            font-family: Verdana, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #ffffff;
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 0.3em;
+            font-size: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #8b949e;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #1f6feb;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.3);
+        }
+
+        button {
+            background-color: #238636;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+            font-family: inherit;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2ea043;
+        }
+
+        .sql-fields {
+            background-color: #161b22;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
+            margin-top: 10px;
+        }
+
+        .char-counter {
+            color: #8b949e;
+            font-size: 0.8em;
+            text-align: right;
+            margin-top: -8px;
+            margin-bottom: 10px;
+        }
+
+        .char-counter.warning {
+            color: #f85149;
+        }
+
+        #urlLength {
+            color: #8b949e;
+            font-size: 0.8em;
+            text-align: right;
+            margin-top: -8px;
+        }
+		.issue-fields { display: none; }
+    </style>
+</head>
+<body>
+    <h2>TrinityCore 3.3.5 GitHub Issue Autofiller</h2>
+    <b>Make sure you are already <a href="https://github.com/login" target="_blank" title="login">logged in GitHub.</a><br>Following parameters will be auto-filled for 3.3.5 for both templates: branch, commit 😂</b>
+    <br><br>
+    <div class="input-group">
+        <label for="template">Select Template:</label>
+        <select id="template" onchange="toggleTemplateFields()">
+            <option value="sql_fix.yml" selected>SQL Fix Template</option>
+            <option value="issue.yml">Standard Issue Template</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label for="title">Title:</label>
+        <input type="text" id="title" required>
+    </div>
+
+    <div class="input-group">
+        <label for="description">Description:</label>
+        <textarea type="text" id="description" rows="4" placeholder="For long texts, leave this field empty and complete it in opened github page !"></textarea>
+    </div>
+
+    <!-- Issue Template Specific Fields -->
+    <div class="issue-fields" id="issue">
+        <div class="input-group">
+            <label for="expected">Expected behaviour:</label>
+            <textarea type="text" id="expected" rows="4" placeholder="For long texts, leave this field empty and complete it in opened github page !"></textarea>
+        </div>
+
+        <div class="input-group">
+            <label for="reproduce">Steps to reproduce the problem:</label>
+            <textarea type="text" id="reproduce" rows="4" placeholder="For long texts, leave this field empty and complete it in opened github page !"></textarea>
+        </div>
+
+        <div class="input-group">
+            <label for="os">Operating system:</label>
+            <input type="text" id="os">
+        </div>
+        <div class="input-group">
+            <label for="changes">Custom changes</label>
+            <input type="changes" id="changes">
+        </div>
+    </div>
+
+    <!-- SQL Template Specific Fields -->
+    <div class="sql-fields" id="sqlFields">
+        <div class="input-group">
+            <label for="fix">SQL Fix:</label>
+            <textarea type="text" id="fix" rows="10" maxlength="5096" placeholder="For long texts, leave this field empty and complete it in opened github page !"></textarea>
+        </div>
+    </div>
+
+    <!--<div class="input-group">
+        <label for="template">Select branch: (is broken for now it will fallback to default 3.3.5)</label>
+        <select id="branch">
+            <option value="3.3.5" selected disabled>3.3.5</option>
+        </select>
+    </div>-->
+    <br>
+    <center><button onclick="createIssue()">Open GitHub Issue template</button></center>
+
+    <script>
+        function toggleTemplateFields() {
+            const template = document.getElementById('template').value;
+            const sqlFields = document.getElementById('sqlFields');
+            const issueFields = document.getElementById('issue');
+
+            // Toggle template-specific fields
+            if (template === 'sql_fix.yml') {
+                sqlFields.style.display = 'block';
+                issueFields.style.display = 'none';
+                document.getElementById('fix').required = true;
+            } else {
+                sqlFields.style.display = 'none';
+                issueFields.style.display = 'block';
+                document.getElementById('description').required = true;
+            }
+        }
+
+        async function createIssue() {
+            const template = document.getElementById('template').value;
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const branch = '3.3.5';
+            const expected = document.getElementById('expected').value;
+            const reproduce = document.getElementById('reproduce').value;
+            const fix = document.getElementById('fix').value;
+            const os = document.getElementById('os').value;
+            const changes = document.getElementById('changes').value;
+
+            // Basic validation
+            if (!title) {
+                alert('Please fill all required fields!');
+                return;
+            }
+
+            try {
+                let commitHash = '';
+                if (template) {
+                    if (!branch) {
+                        alert('Branch is required for SQL Fix template!');
+                        return;
+                    }
+                    
+                    // Get commit hash from GitHub API
+                    const response = await fetch(
+                        `https://api.github.com/repos/TrinityCore/TrinityCore/branches/${branch}`
+                    );
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    commitHash = data.commit.sha;
+                }
+
+                // Construct base URL
+                const params = new URLSearchParams({
+                    template: template,
+                    title: title,
+                    description: description.replace(/\n/g, '%0A'),
+                    branch: branch,
+                    commit: commitHash
+                });
+
+                // Add template-specific parameters if needed
+                if (template === 'sql_fix.yml') {
+                    params.append('fix', fix);
+                } else if (template === 'issue.yml') {
+                    params.append('expected', expected);
+                    params.append('reproduce', reproduce);
+                    params.append('os', os);
+                    params.append('custom', changes);
+                }
+
+                // Open in new tab
+                window.open(`https://github.com/TrinityCore/TrinityCore/issues/new?${params.toString()}`, '_blank');
+
+            } catch (error) {
+                alert(`Error: ${error.message}\nCheck if branch name is valid.`);
+            }
+        }
+    </script>
+</body>
+</html>
